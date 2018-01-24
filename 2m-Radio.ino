@@ -33,11 +33,12 @@
   Char array number addition: https://www.reddit.com/r/cpp_questions/comments/45ggz7/adding_digits_from_a_char_array/czxqhep/
 
 */
-#undef U8X8_HAVE_HW_SPI
-#undef _SPI_H_INCLUDED
+
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <Wire.h>
+#undef U8X8_HAVE_HW_SPI
+#undef _SPI_H_INCLUDED
 
 // Physical Pin Defines
 const int menuPin=27;
@@ -75,7 +76,6 @@ const int encCLKPin = 5;
     
 */
 
-// Please UNCOMMENT one of the contructor lines below
 // U8g2 Contructor List (Frame Buffer)
 // The complete list is available here: https://github.com/olikraus/u8g2/wiki/u8g2setupcpp
 // Please update the pin numbers according to your setup. Use U8X8_PIN_NONE if the reset pin is not connected
@@ -119,6 +119,9 @@ int offnum=0;
 
 int selectState=0;
 int lastSelectState=0;
+
+int menuState=0;
+int lastMenuState=0;
 
 // CTCSS Codes
 const char ctcss_array[39][3]={
@@ -204,13 +207,13 @@ void u8g2_prepare(void) {
 void drawSplash(void) {
   /*if (start_state==0) {
     u8g2.drawRFrame(19,29,95,11,5);
-    u8g2.drawStr(22,30,"XXXXXX 2M Radio");  
+    u8g2.drawStr(22,30,"xxxxxx 2M Radio");  
   }*/
     //digitalWrite(13,HIGH);
     u8g2.firstPage();
     do {
       u8g2.drawRFrame(19,29,95,11,5);
-      u8g2.drawStr(22,30,"XXXXXX 2M Radio"); 
+      u8g2.drawStr(22,30,"xxxxxx 2M Radio"); 
     } while (u8g2.nextPage());
     delay(2000);
     start_state=1; 
@@ -222,7 +225,7 @@ void topbar(void) {
     u8g2.drawFrame(0,0,128,11);
     
     // Draw Power Level
-    u8g2.drawStr(5,9,pwrlvlbar);
+    u8g2.drawStr(5,0,pwrlvlbar);
     //
     
     // Draw vertical line
@@ -230,7 +233,7 @@ void topbar(void) {
     //
 
     // Draw Shift Indicator
-    u8g2.drawStr(43,9,shiftbar);
+    u8g2.drawStr(43,0,shiftbar);
     //
 
     // Draw vertical line
@@ -238,7 +241,7 @@ void topbar(void) {
     //
     
     // Draw Bandwidth 
-    u8g2.drawStr(91,9,bwbar);
+    u8g2.drawStr(91,0,bwbar);
     //
 }
 
@@ -302,25 +305,20 @@ void ptt_ISR() {
 
 void setup(void) {
   //Encoder     
-  pinMode( encDTPin, INPUT );
-  pinMode( encCLKPin, INPUT );
-  pinMode(selectPin, INPUT );
-  pinMode(menuPin,INPUT);
-  pinMode(pttPin,INPUT);
-  digitalWrite( encDTPin, HIGH );                // set pullups?
-  digitalWrite( encCLKPin, HIGH );                //      "
-  digitalWrite( selectPin, HIGH);
-  digitalWrite( menuPin,HIGH);
-  attachInterrupt( digitalPinToInterrupt(encDTPin), AB_isr, CHANGE );   // pin-change interrupts: 
+  pinMode( encDTPin, INPUT_PULLUP );
+  pinMode( encCLKPin, INPUT_PULLUP );
+  attachInterrupt( digitalPinToInterrupt(encDTPin), AB_isr, CHANGE );
   attachInterrupt( digitalPinToInterrupt(encCLKPin), AB_isr, CHANGE );
+  // Other Pins
+  pinMode(selectPin, INPUT_PULLUP );
+  pinMode(menuPin,INPUT_PULLUP);
+  // PTT
+  pinMode(pttPin,INPUT_PULLUP);
   attachInterrupt( digitalPinToInterrupt(pttPin), ptt_ISR, CHANGE);
-  //
-  //pinMode(13,OUTPUT);
-//  pinMode(28,OUTPUT);
-
+  // Setup Display
   u8g2.begin();
 
-  state = (digitalRead( encDTPin ) << 1) | digitalRead( encCLKPin );     // Initialise state.
+  state = (digitalRead( encDTPin ) << 1) | digitalRead( encCLKPin );
   old_count = 0;
   shiftbar[6]=repshift[0];
   bwbar[3]=bw[0];
@@ -338,13 +336,17 @@ void loop(void) {
   }
 
   // Menu
-  if (digitalRead(menuPin)==LOW){
-    initPos=count;
-    cursorPos=26;
-    enterMenu=1;
+  if (digitalRead(menuPin)==LOW&&txOn==0){
+      initPos=count;
+      cursorPos=26;
+      enterMenu=1;   
   }
 
   if (enterMenu>0) {
+          if (txOn==HIGH){
+        // Draw box in about the middle of the screen, inverting text to visually indicate transmit
+        u8g2.drawBox(0,13,128,35);
+      }
     selectState=digitalRead(selectPin);
     lastSelectState=selectState;
     tracker=count;
@@ -371,6 +373,10 @@ void loop(void) {
             tracker=count;
           }
         }
+              if (txOn==HIGH){
+        // Draw box in about the middle of the screen, inverting text to visually indicate transmit
+        u8g2.drawBox(0,13,128,35);
+      }
         u8g2.drawStr(43,13,"Menu 1");
         u8g2.drawGlyph(0,cursorPos,0x003e);
         u8g2.drawStr(7,26,"Repeater Offset");
@@ -488,7 +494,7 @@ void loop(void) {
             else if (cursorPos==39) {
               repshiftm=1;
               tracker=count;
-              // Start cursor @ 32 (first digit)
+              // Start cursor @ 59 (center posistion)
               cursorPos=59;
               do {
                 // Going into a submenu, Reset the select button
@@ -752,7 +758,7 @@ void loop(void) {
               } while (fsm==1);
 
             // End Frequency Steps If
-            }
+            } // Begin filter menu here...
           }
         }
         lastSelectState=selectState;
@@ -797,25 +803,25 @@ void loop(void) {
       // Set font to 10pixel - u8g2_font_9x15_tf X11
       u8g2.setFont(u8g2_font_9x15_tf);
       // Indicate mode (Channel or VFO)
-      u8g2.drawStr(0,24,chan);
+      u8g2.drawStr(0,13,chan);
   
       // Set font to 20pixel - u8g2_font_fub20_tf Free Universal
       u8g2.setFont(u8g2_font_fub20_tf);
       // Display the Frequency we're currently receiving, else display TX Freq
       if (txOn==0) {
-        u8g2.drawStr(0,47,rxfreq);
+        u8g2.drawStr(0,26,rxfreq);
       } else if (txOn==1) {
-        u8g2.drawStr(0,47,txfreq);
+        u8g2.drawStr(0,26,txfreq);
       }
       // Set font back to 10pixel - u8g2_font_9x15_tf X11
       u8g2.setFont(u8g2_font_9x15_tf);
-      u8g2.drawStr(102,47,"Mhz");
+      u8g2.drawStr(102,35,"Mhz");
       // Display Encoder
       String str1=String(count);
       char countd[10];
       str1.toCharArray(countd,10);
       //Count.toCharArray(countd,5);
-      u8g2.drawStr(0,64,countd);
+      u8g2.drawStr(0,51,countd);
   
     } while (u8g2.nextPage() );
     
