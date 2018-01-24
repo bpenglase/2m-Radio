@@ -9,6 +9,8 @@ cheap](https://www.ebay.com/itm/144MHz-145MHz-146MHz-154MHz-174MHz-VHF-HAM-Radio
 
 The display is a [White 1.3" 128x64 SSH1106 based I2C OLED display](https://www.ebay.com/itm/1-3-White-OLED-LCD-4PIN-Display-Module-IIC-I2C-Interface-128x64-for-Arduino/382325318585) off eBay.
 
+The display is being driven with the [u8g2 library](https://github.com/olikraus/u8g2).
+
 [Current look at the physical side](https://i.imgur.com/4F7A7NM.jpg).
 
 
