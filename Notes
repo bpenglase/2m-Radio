@@ -1,0 +1,13 @@
+Notes:
+
+* Prevent menu entry when TXing - Believe this is done
+* Fix up menu display from changes in the u8g2 code (I think?) that shifted things around
+* Finish creating menu options
+* Implement radio functionality
+	* Possibly use darksidelemm/dra818?
+		* Quick glance, may need some modifications to fit my needs, worth of commit back?
+
+* Circuit design (Schematic, physical PCB layout)
+* Picking of enclosure
+* Research lowpass filter design 
+* Research audio/mic opamps
