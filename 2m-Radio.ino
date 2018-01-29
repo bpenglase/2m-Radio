@@ -567,13 +567,13 @@ void loop(void) {
               } while (repshiftm==1);
 
             // End Repeater Offset Menu If
-            // Start Bandwidth H/L Menu
+            // Start Bandwidth W/N Menu
             } 
             else if (cursorPos==52) {
               bwm=1;
               tracker=count;
-              // Start cursor @ 32 (first digit)
-              cursorPos=46;
+              // Start cursor @ 46 (first option)
+              cursorPos=26;
               do {
                 // Going into a submenu, Reset the select button
                 lastSelectState=selectState;
@@ -625,9 +625,9 @@ void loop(void) {
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     if (bw[0]==87) {
-                      u8g2.drawBox(39,15,48,13);
+                      u8g2.drawBox(39,25,48,13);
                     } else if (bw[0]==78) {
-                      u8g2.drawBox(39,28,48,13);
+                      u8g2.drawBox(39,38,48,13);
                     }
                   }
                   
@@ -641,7 +641,7 @@ void loop(void) {
 
               } while (bwm==1);
 
-            // End Repeater Offset Menu If
+            // End Bandwidth Menu If
             }
             
           // End Menu Button Selection
