@@ -695,7 +695,7 @@ void loop(void) {
               // Frequency Steps Menu
               fsm=1;
               tracker=count;
-              // Start cursor @ 32 (first digit)
+              // Start cursor @ 46 (first digit)
               cursorPos=46;
               do {
                 // Going into a submenu, Reset the select button
@@ -747,9 +747,9 @@ void loop(void) {
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     if (fqs==0) {
-                      u8g2.drawBox(31,15,65,13);
+                      u8g2.drawBox(31,25,65,13);
                     } else if (fqs==1) {
-                      u8g2.drawBox(31,28,65,13);
+                      u8g2.drawBox(31,38,65,13);
                     }
                   }
                   
