@@ -375,10 +375,10 @@ void loop(void) {
             tracker=count;
           }
         }
-              if (txOn==HIGH){
+        if (txOn==HIGH){
         // Draw box in about the middle of the screen, inverting text to visually indicate transmit
-        u8g2.drawBox(0,13,128,35);
-      }
+          u8g2.drawBox(0,13,128,35);
+        }
         u8g2.drawStr(43,13,"Menu 1");
         u8g2.drawGlyph(0,cursorPos,0x003e);
         u8g2.drawStr(7,26,"Repeater Offset");
@@ -789,7 +789,11 @@ void loop(void) {
                   // 5052 = exit position
                   if (tracker!=count&&cursorPos!=5052) {
                       if (fss==2) {
-                        fss=1;
+                        if (tracker>count){
+                          fss=1;
+                          
+                        }
+                        
                       } else if (fss==1) {
                         fss=0;
                       } else if (fss==0) {
@@ -823,11 +827,14 @@ void loop(void) {
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     if (fss==0) {
-                      u8g2.drawBox(31,13,71,13);
+                      u8g2.drawGlyph(0,cursorPos,0x003e);
+                      //u8g2.drawBox(31,13,71,13);
                     } else if (fss==1) {
-                      u8g2.drawBox(31,26,71,13);
+                      u8g2.drawGlyph(0,cursorPos,0x003e);
+                      //u8g2.drawBox(31,26,71,13);
                     } else if (fss==2) {
-                      u8g2.drawBox(31,39,71,13);
+                      u8g2.drawGlyph(0,cursorPos,0x003e);
+                      //u8g2.drawBox(31,39,71,13);
                     }
                   }
                   
