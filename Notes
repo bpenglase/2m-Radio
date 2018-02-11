@@ -6,6 +6,7 @@ Notes:
 * Implement radio functionality
 	* Possibly use darksidelemm/dra818?
 		* Quick glance, may need some modifications to fit my needs, worth of commit back?
+	* Or... fatpat/arduino-dra818? Fork from above...
 
 * Circuit design (Schematic, physical PCB layout)
 * Picking of enclosure

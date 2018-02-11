@@ -101,6 +101,8 @@ int enterMenu=0;
 int bwm=0;
 int fqs=0;
 int fsm=0;
+int hlfm=0;
+int fss=0;
 
 //TopBar Variables and their defaults
 char pwrlvlbar[6]="PWR:L";
@@ -691,7 +693,8 @@ void loop(void) {
             // Exit Menu
             if (cursorPos==52) {
               enterMenu=0;
-            } else if (cursorPos==26) {
+            } 
+            else if (cursorPos==26) {
               // Frequency Steps Menu
               fsm=1;
               tracker=count;
@@ -758,7 +761,80 @@ void loop(void) {
               } while (fsm==1);
 
             // End Frequency Steps If
-            } // Begin filter menu here...
+            
+            } 
+            // Begin filter menu if
+            else if (cursorPos==39) {
+              // Filter Menu
+              hlfm=1;
+              tracker=count;
+              // Start cursor @ 46 (first digit)
+              cursorPos=39;
+              do {
+                // Going into a submenu, Reset the select button
+                lastSelectState=selectState;
+                u8g2.firstPage();
+                
+                do {
+                  selectState=digitalRead(selectPin); 
+                  //Filter display
+                  u8g2.setFont(u8g2_font_7x13_tf);
+                  u8g2.drawStr(39,0,"Filters");
+                  u8g2.drawStr(50,52,"Exit");
+                  u8g2.drawStr(36,13,"Emphasis");
+                  u8g2.drawStr(36,26,"High Pass");
+                  u8g2.drawStr(36,39,"Low Pass");
+
+                  // Figure out if we moved the dial, then operate on it.
+                  // 5052 = exit position
+                  if (tracker!=count&&cursorPos!=5052) {
+                      if (fss==2) {
+                        fss=1;
+                      } else if (fss==1) {
+                        fss=0;
+                      } else if (fss==0) {
+                        fss=2;
+                      }
+                      tracker=count;
+                  }
+
+                  // Operate on the select button
+                  if (selectState!=lastSelectState) {
+                    if (selectState==LOW) {
+                      if (cursorPos==5052) {
+                        // Exit selected. Operate on offset to the RX and store in txfreq, Exit out of this menu, and clear the screen
+                        // Copy the offset, so we can increase the next digit if we roll past 9, without effecting what it's actually set to
+                        // Update the top bar info
+                        hlfm=0;
+                        u8g2.clearBuffer();
+                        // Return cursorPos to position on Menu1
+                        cursorPos=26;
+                      } else {
+                        // If button is pressed, Move to Exit (Only one toggling)
+                        cursorPos=5052;
+                      }
+                    }
+                  }
+                  lastSelectState=selectState;
+
+                  // If the position cursor is on exit, Display >, otherwise highlight the selected BW
+                  if (cursorPos==5052) {
+                    u8g2.setFont(u8g2_font_7x13_tf);
+                    u8g2.drawGlyph(42,52,0x003e);
+                  } else {
+                    if (fss==0) {
+                      u8g2.drawBox(31,13,71,13);
+                    } else if (fss==1) {
+                      u8g2.drawBox(31,26,71,13);
+                    } else if (fss==2) {
+                      u8g2.drawBox(31,39,71,13);
+                    }
+                  }
+                  
+                } while ( u8g2.nextPage());
+
+              } while (hlfm==1);
+            } // End Filter Menu
           }
         }
         lastSelectState=selectState;
