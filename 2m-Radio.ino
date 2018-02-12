@@ -103,9 +103,21 @@ int fqs=0;
 int fsm=0;
 int hlfm=0;
 int fss=0;
+
+// Filters
+int fltrm=0;
+// pre/de-emphasis
 int pde=0;
 int pdem=0;
-int fltrm=0;
+// high pass
+int hpfm=0;
+int hpf=0;
+// low pass
+int lpfm=0;
+int lpf=0;
+// End Filters
+
+
 
 //TopBar Variables and their defaults
 char pwrlvlbar[6]="PWR:L";
@@ -770,6 +782,7 @@ void loop(void) {
             else if (cursorPos==39) {
 ////////////////////////////////////////////////////////////////////
               // Start Filter Menu
+              lastSelectState=selectState;
               fltrm=1;
               tracker=count;
               cursorPos=13;
@@ -809,8 +822,8 @@ void loop(void) {
                         fltrm=0;
                         cursorPos=39;
                       } 
+                      // Pre/De-Emphasis Enable/Disable
                       else if (cursorPos==13) {
-                        // Pre/De-Emphasis Enable/Disable
                         pdem=1;
                         tracker=count;
                         // Start cursor @ 46 (first digit)
@@ -826,7 +839,7 @@ void loop(void) {
                             u8g2.setFont(u8g2_font_7x13_tf);
                             u8g2.drawStr(11,0,"Pre/De-Emphasis");
                             u8g2.drawStr(50,52,"Exit");
-                            u8g2.drawStr(50,13,"Enable");
+                            u8g2.drawStr(43,13,"Enable");
                             u8g2.drawStr(43,26,"Disable");
           
                             // Figure out if we moved the dial, then operate on it.
@@ -834,7 +847,7 @@ void loop(void) {
                             if (tracker!=count&&cursorPos!=5052) {
                                 if (pde==1) {
                                   pde=0;
-                                } else if (pde==9) {
+                                } else if (pde==0) {
                                   pde=1;
                                 }
                                 tracker=count;
@@ -865,58 +878,49 @@ void loop(void) {
                               u8g2.drawGlyph(42,52,0x003e);
                             } else {
                               if (pde==1) {
-                                u8g2.drawBox(48,27,50,13);
+                                u8g2.drawBox(40,12,54,13);
                               } else if (pde==0) {
-                                u8g2.drawBox(48,40,50,13);
+                                u8g2.drawBox(40,25,54,13);
                               }
                             }
                           } while ( u8g2.nextPage());
                           ////////
           
                         } while (pdem==1);
-          
-                      // End Emphasis Enable/Disable
-                      
+           
                       } 
-                      // Begin filter menu if
+                      // End Emphasis Enable/Disable
+                      // High Pass Enable/Disable
                       else if (cursorPos==26) {
-                        // Filter Menu
-                        hlfm=1;
+                        hpfm=1;
                         tracker=count;
                         // Start cursor @ 46 (first digit)
-                        cursorPos=39;
+                        cursorPos=46;
                         do {
                           // Going into a submenu, Reset the select button
                           lastSelectState=selectState;
                           u8g2.firstPage();
-                          
+                          ///////////
                           do {
                             selectState=digitalRead(selectPin); 
-                            //Filter display
+                            //Bandiwdth display
                             u8g2.setFont(u8g2_font_7x13_tf);
-                            u8g2.drawStr(39,0,"Filters");
+                            u8g2.drawStr(8,0,"High Pass Filter");
                             u8g2.drawStr(50,52,"Exit");
-                            u8g2.drawStr(36,13,"Emphasis");
-                            u8g2.drawStr(36,26,"High Pass");
-                            u8g2.drawStr(36,39,"Low Pass");
+                            u8g2.drawStr(43,13,"Enable");
+                            u8g2.drawStr(43,26,"Disable");
           
                             // Figure out if we moved the dial, then operate on it.
                             // 5052 = exit position
                             if (tracker!=count&&cursorPos!=5052) {
-                                if (fss==2) {
-                                  if (tracker>count){
-                                    fss=1;
-                                    
-                                  }
-                                  
-                                } else if (fss==1) {
-                                  fss=0;
-                                  } else if (fss==0) {
-                                    fss=2;
+                                if (hpf==1) {
+                                  hpf=0;
+                                } else if (hpf==0) {
+                                  hpf=1;
                                 }
-                                  tracker=count;
+                                tracker=count;
                             }
-          
+
                             // Operate on the select button
                             if (selectState!=lastSelectState) {
                               if (selectState==LOW) {
@@ -924,9 +928,9 @@ void loop(void) {
                                   // Exit selected. Operate on offset to the RX and store in txfreq, Exit out of this menu, and clear the screen
                                   // Copy the offset, so we can increase the next digit if we roll past 9, without effecting what it's actually set to
                                   // Update the top bar info
-                                  hlfm=0;
+                                  hpfm=0;
                                   u8g2.clearBuffer();
-                                  // Return cursorPos to position on Menu1
+                                  // Return cursorPos to position on Filter Menu
                                   cursorPos=26;
                                 } else {
                                   // If button is pressed, Move to Exit (Only one toggling)
@@ -941,22 +945,87 @@ void loop(void) {
                               u8g2.setFont(u8g2_font_7x13_tf);
                               u8g2.drawGlyph(42,52,0x003e);
                             } else {
-                              if (fss==0) {
-                                u8g2.drawGlyph(0,cursorPos,0x003e);
-                                //u8g2.drawBox(31,13,71,13);
-                              } else if (fss==1) {
-                                u8g2.drawGlyph(0,cursorPos,0x003e);
-                                //u8g2.drawBox(31,26,71,13);
-                              } else if (fss==2) {
-                                u8g2.drawGlyph(0,cursorPos,0x003e);
-                                //u8g2.drawBox(31,39,71,13);
+                              if (hpf==1) {
+                                u8g2.drawBox(40,12,54,13);
+                              } else if (hpf==0) {
+                                u8g2.drawBox(40,25,54,13);
                               }
                             }
-                            
                           } while ( u8g2.nextPage());
+                          ////////
           
-                        } while (hlfm==1);
-                      } // End Filter Menu
+                        } while (hpfm==1);
+                      
+                      } 
+                      // End High Pass Filter
+                      // Low Pass Filter
+                      else if (cursorPos==39) {
+                        lpfm=1;
+                        tracker=count;
+                        // Start cursor @ 46 (first digit)
+                        cursorPos=46;
+                        do {
+                          // Going into a submenu, Reset the select button
+                          lastSelectState=selectState;
+                          u8g2.firstPage();
+                          ///////////
+                          do {
+                            selectState=digitalRead(selectPin); 
+                            //Bandiwdth display
+                            u8g2.setFont(u8g2_font_7x13_tf);
+                            u8g2.drawStr(11,0,"Low Pass Filter");
+                            u8g2.drawStr(50,52,"Exit");
+                            u8g2.drawStr(43,13,"Enable");
+                            u8g2.drawStr(43,26,"Disable");
+          
+                            // Figure out if we moved the dial, then operate on it.
+                            // 5052 = exit position
+                            if (tracker!=count&&cursorPos!=5052) {
+                                if (lpf==1) {
+                                  lpf=0;
+                                } else if (lpf==0) {
+                                  lpf=1;
+                                }
+                                tracker=count;
+                            }
+
+                            // Operate on the select button
+                            if (selectState!=lastSelectState) {
+                              if (selectState==LOW) {
+                                if (cursorPos==5052) {
+                                  // Exit selected. Operate on offset to the RX and store in txfreq, Exit out of this menu, and clear the screen
+                                  // Copy the offset, so we can increase the next digit if we roll past 9, without effecting what it's actually set to
+                                  // Update the top bar info
+                                  lpfm=0;
+                                  u8g2.clearBuffer();
+                                  // Return cursorPos to position on Filter Menu
+                                  cursorPos=39;
+                                } else {
+                                  // If button is pressed, Move to Exit (Only one toggling)
+                                  cursorPos=5052;
+                                }
+                              }
+                            }
+                            lastSelectState=selectState;
+          
+                            // If the position cursor is on exit, Display >, otherwise highlight the selected BW
+                            if (cursorPos==5052) {
+                              u8g2.setFont(u8g2_font_7x13_tf);
+                              u8g2.drawGlyph(42,52,0x003e);
+                            } else {
+                              if (lpf==1) {
+                                u8g2.drawBox(40,12,54,13);
+                              } else if (lpf==0) {
+                                u8g2.drawBox(40,25,54,13);
+                              }
+                            }
+                          } while ( u8g2.nextPage());
+                          ////////
+          
+                        } while (lpfm==1);
+                      }
+                      // End Low Pass FIlter
+                      
                     }
                   }
                   lastSelectState=selectState;
@@ -966,7 +1035,6 @@ void loop(void) {
                 // Freuqncy Scanning??
                 // Group Setting?
                 // Volume
-                // LP/HP Filter
                 // Tail Tone? (Bad Ham)
                 // RSSI?
                 } while (u8g2.nextPage());
