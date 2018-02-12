@@ -12,3 +12,13 @@ Notes:
 * Picking of enclosure
 * Research lowpass filter design 
 * Research audio/mic opamps
+
+Todo
+// Power Saving (Physical pin)
+// RF Power Selection (Physical Pin)
+// Handshake - startup?
+// Freuqncy Scanning??
+// Group Setting?
+// Volume
+// RSSI?
+

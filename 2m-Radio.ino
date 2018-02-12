@@ -117,6 +117,10 @@ int lpfm=0;
 int lpf=0;
 // End Filters
 
+// Tail Tone
+int ttm=0;
+int tt=0;
+
 
 
 //TopBar Variables and their defaults
@@ -372,13 +376,13 @@ void loop(void) {
       u8g2.firstPage();
       selectState=digitalRead(selectPin); 
       do {
-        // Set font to 10pixel - u8g2_font_9x15_tf X11
-        u8g2.setFont(u8g2_font_7x13_tf);
+        // Set font to 7pixel w/ symbols - u8g2_font_7x13_t_symbols
+        u8g2.setFont(u8g2_font_7x13_t_symbols);
         if (tracker!=count) {
           if (tracker<count){
             cursorPos+=13;
             if (cursorPos>52) {
-              cursorPos=26;
+              cursorPos=0;
               enterMenu=2;
             }
             tracker=count;
@@ -394,8 +398,9 @@ void loop(void) {
         // Draw box in about the middle of the screen, inverting text to visually indicate transmit
           u8g2.drawBox(0,13,128,35);
         }
-        u8g2.drawStr(43,13,"Menu 1");
-        u8g2.drawGlyph(0,cursorPos,0x003e);
+        u8g2.drawStr(33,13,"Main Menu");
+        u8g2.drawGlyph(0,cursorPos,0x003e); // Select Carrot
+        u8g2.drawGlyph(121,53,0x2193); // Down Arrow
         u8g2.drawStr(7,26,"Repeater Offset");
         u8g2.drawStr(7,39,"Repeater Shift");
         u8g2.drawStr(7,52,"Bandwidth");
@@ -497,7 +502,6 @@ void loop(void) {
 
                   // If the position cursor is on exit, Display >, otherwise underline the selected digit
                   if (cursorPos==5052) {
-                    u8g2.setFont(u8g2_font_7x13_tf);
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     u8g2.drawGlyph(cursorPos,28,0x005f);
@@ -567,7 +571,6 @@ void loop(void) {
 
                   // If the position cursor is on exit, Display >, otherwise underline the selected digit
                   if (cursorPos==5052) {
-                    u8g2.setFont(u8g2_font_7x13_tf);
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     u8g2.drawGlyph(cursorPos,28,0x005f);
@@ -599,7 +602,6 @@ void loop(void) {
                 do {
                   selectState=digitalRead(selectPin); 
                   //Bandiwdth display
-                  u8g2.setFont(u8g2_font_7x13_tf);
                   u8g2.drawStr(32,13,"Bandwidth");
                   u8g2.drawStr(50,52,"Exit");
                   u8g2.drawStr(50,26,"Wide");
@@ -638,7 +640,6 @@ void loop(void) {
 
                   // If the position cursor is on exit, Display >, otherwise highlight the selected BW
                   if (cursorPos==5052) {
-                    u8g2.setFont(u8g2_font_7x13_tf);
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     if (bw[0]==87) {
@@ -679,8 +680,8 @@ void loop(void) {
       u8g2.firstPage();
       selectState=digitalRead(selectPin); 
       do {
-        // Set font to 10pixel - u8g2_font_9x15_tf X11
-        u8g2.setFont(u8g2_font_7x13_tf);
+        // Set font to 7x13 with symbols - u8g2_font_7x13_t_symbols
+        u8g2.setFont(u8g2_font_7x13_t_symbols);
         if (tracker!=count) {
           if (tracker<count){
             cursorPos+=13;
@@ -691,17 +692,19 @@ void loop(void) {
             tracker=count;
           } else if (tracker>count){
             cursorPos-=13;
-            if (cursorPos<26) {
+            if (cursorPos<0) {
               cursorPos=52;
               enterMenu=1;
             }
             tracker=count;
           }
         }
-        u8g2.drawStr(43,13,"Menu 2");
-        u8g2.drawGlyph(0,cursorPos,0x003e);
-        u8g2.drawStr(7,26,"Frequency Steps");
-        u8g2.drawStr(7,39,"Filter");
+        u8g2.drawGlyph(0,cursorPos,0x003e); // Right Select Carrot
+        u8g2.drawGlyph(121,0,0x2191); // Up Arrow
+        //u8g2.drawGlyph(121,53,0x2193); // Down Arrow
+        u8g2.drawStr(7,0,"Frequency Steps");
+        u8g2.drawStr(7,13,"Filter");
+        u8g2.drawStr(7,26,"Tail Tone");
         u8g2.drawStr(7,52,"Exit");
         if (selectState!=lastSelectState) {
           if (selectState==LOW) {
@@ -710,7 +713,7 @@ void loop(void) {
               enterMenu=0;
             } 
             // Frequency Steps Menu
-            else if (cursorPos==26) {
+            else if (cursorPos==0) {
               fsm=1;
               tracker=count;
               // Start cursor @ 46 (first digit)
@@ -723,7 +726,6 @@ void loop(void) {
                 do {
                   selectState=digitalRead(selectPin); 
                   //Bandiwdth display
-                  u8g2.setFont(u8g2_font_7x13_tf);
                   u8g2.drawStr(12,13,"Frequency Steps");
                   u8g2.drawStr(50,52,"Exit");
                   u8g2.drawStr(36,26,"12.5 Khz");
@@ -750,7 +752,7 @@ void loop(void) {
                         fsm=0;
                         u8g2.clearBuffer();
                         // Return cursorPos to position on Menu1
-                        cursorPos=26;
+                        cursorPos=0;
                       } else {
                         // If button is pressed, Move to Exit (Only one toggling)
                         cursorPos=5052;
@@ -761,7 +763,6 @@ void loop(void) {
 
                   // If the position cursor is on exit, Display >, otherwise highlight the selected BW
                   if (cursorPos==5052) {
-                    u8g2.setFont(u8g2_font_7x13_tf);
                     u8g2.drawGlyph(42,52,0x003e);
                   } else {
                     if (fqs==0) {
@@ -774,13 +775,10 @@ void loop(void) {
                 } while ( u8g2.nextPage());
 
               } while (fsm==1);
-
-            // End Frequency Steps If
-            
             } 
+            // End Frequency Steps If
             // Begin filter menu if
-            else if (cursorPos==39) {
-////////////////////////////////////////////////////////////////////
+            else if (cursorPos==13) {
               // Start Filter Menu
               lastSelectState=selectState;
               fltrm=1;
@@ -790,8 +788,6 @@ void loop(void) {
                 u8g2.firstPage();
                 selectState=digitalRead(selectPin); 
                 do {
-                  // Set font to 10pixel - u8g2_font_9x15_tf X11
-                  u8g2.setFont(u8g2_font_7x13_tf);
                   if (tracker!=count) {
                     if (tracker<count){ //right
                       cursorPos+=13;
@@ -820,7 +816,8 @@ void loop(void) {
                       // Exit Menu
                       if (cursorPos==52) {
                         fltrm=0;
-                        cursorPos=39;
+                        // Position from when we entered
+                        cursorPos=13;
                       } 
                       // Pre/De-Emphasis Enable/Disable
                       else if (cursorPos==13) {
@@ -832,11 +829,9 @@ void loop(void) {
                           // Going into a submenu, Reset the select button
                           lastSelectState=selectState;
                           u8g2.firstPage();
-                          ///////////
                           do {
                             selectState=digitalRead(selectPin); 
                             //Bandiwdth display
-                            u8g2.setFont(u8g2_font_7x13_tf);
                             u8g2.drawStr(11,0,"Pre/De-Emphasis");
                             u8g2.drawStr(50,52,"Exit");
                             u8g2.drawStr(43,13,"Enable");
@@ -874,7 +869,6 @@ void loop(void) {
           
                             // If the position cursor is on exit, Display >, otherwise highlight the selected BW
                             if (cursorPos==5052) {
-                              u8g2.setFont(u8g2_font_7x13_tf);
                               u8g2.drawGlyph(42,52,0x003e);
                             } else {
                               if (pde==1) {
@@ -884,10 +878,7 @@ void loop(void) {
                               }
                             }
                           } while ( u8g2.nextPage());
-                          ////////
-          
                         } while (pdem==1);
-           
                       } 
                       // End Emphasis Enable/Disable
                       // High Pass Enable/Disable
@@ -900,11 +891,9 @@ void loop(void) {
                           // Going into a submenu, Reset the select button
                           lastSelectState=selectState;
                           u8g2.firstPage();
-                          ///////////
                           do {
                             selectState=digitalRead(selectPin); 
                             //Bandiwdth display
-                            u8g2.setFont(u8g2_font_7x13_tf);
                             u8g2.drawStr(8,0,"High Pass Filter");
                             u8g2.drawStr(50,52,"Exit");
                             u8g2.drawStr(43,13,"Enable");
@@ -942,7 +931,6 @@ void loop(void) {
           
                             // If the position cursor is on exit, Display >, otherwise highlight the selected BW
                             if (cursorPos==5052) {
-                              u8g2.setFont(u8g2_font_7x13_tf);
                               u8g2.drawGlyph(42,52,0x003e);
                             } else {
                               if (hpf==1) {
@@ -952,10 +940,7 @@ void loop(void) {
                               }
                             }
                           } while ( u8g2.nextPage());
-                          ////////
-          
                         } while (hpfm==1);
-                      
                       } 
                       // End High Pass Filter
                       // Low Pass Filter
@@ -968,11 +953,9 @@ void loop(void) {
                           // Going into a submenu, Reset the select button
                           lastSelectState=selectState;
                           u8g2.firstPage();
-                          ///////////
                           do {
                             selectState=digitalRead(selectPin); 
                             //Bandiwdth display
-                            u8g2.setFont(u8g2_font_7x13_tf);
                             u8g2.drawStr(11,0,"Low Pass Filter");
                             u8g2.drawStr(50,52,"Exit");
                             u8g2.drawStr(43,13,"Enable");
@@ -1010,7 +993,6 @@ void loop(void) {
           
                             // If the position cursor is on exit, Display >, otherwise highlight the selected BW
                             if (cursorPos==5052) {
-                              u8g2.setFont(u8g2_font_7x13_tf);
                               u8g2.drawGlyph(42,52,0x003e);
                             } else {
                               if (lpf==1) {
@@ -1020,40 +1002,83 @@ void loop(void) {
                               }
                             }
                           } while ( u8g2.nextPage());
-                          ////////
-          
                         } while (lpfm==1);
                       }
                       // End Low Pass FIlter
-                      
                     }
                   }
                   lastSelectState=selectState;
-                // Power Saving (Physical pin)
-                // RF Power Selection (Physical Pin)
-                // Handshake - startup?
-                // Freuqncy Scanning??
-                // Group Setting?
-                // Volume
-                // Tail Tone? (Bad Ham)
-                // RSSI?
                 } while (u8g2.nextPage());
-              // End Menu2 Do/While Loop  
+              // End Filter Menu Do Loop  
               } while (fltrm==1);
-    /////////////////////////////////////////////////////////////////
-            } // End Filter Menu
+            } 
+            // Tail Tone Menu
+            else if (cursorPos==26) {
+              ttm=1;
+              tracker=count;
+              // Start cursor @ 46 (first digit)
+              //cursorPos=46;
+              do {
+                // Going into a submenu, Reset the select button
+                lastSelectState=selectState;
+                u8g2.firstPage();
+                do {
+                  selectState=digitalRead(selectPin); 
+                  //Bandiwdth display
+                  u8g2.drawStr(33,0,"Tail Tone");
+                  u8g2.drawStr(50,52,"Exit");
+                  u8g2.drawStr(43,13,"Enable");
+                  u8g2.drawStr(43,26,"Disable");
+
+                  // Figure out if we moved the dial, then operate on it.
+                  // 5052 = exit position
+                  if (tracker!=count&&cursorPos!=5052) {
+                      if (tt==1) {
+                        tt=0;
+                      } else if (tt==0) {
+                        tt=1;
+                      }
+                      tracker=count;
+                  }
+
+                  // Operate on the select button
+                  if (selectState!=lastSelectState) {
+                    if (selectState==LOW) {
+                      if (cursorPos==5052) {
+                        // Exit selected. Operate on offset to the RX and store in txfreq, Exit out of this menu, and clear the screen
+                        // Copy the offset, so we can increase the next digit if we roll past 9, without effecting what it's actually set to
+                        // Update the top bar info
+                        ttm=0;
+                        u8g2.clearBuffer();
+                        // Return cursorPos to position on Menu1
+                        cursorPos=26;
+                      } else {
+                        // If button is pressed, Move to Exit (Only one toggling)
+                        cursorPos=5052;
+                      }
+                    }
+                  }
+                  lastSelectState=selectState;
+
+                  // If the position cursor is on exit, Display >, otherwise highlight the selected BW
+                  if (cursorPos==5052) {
+                    u8g2.drawGlyph(42,52,0x003e);
+                  } else {
+                    if (tt==0) {
+                      u8g2.drawBox(40,12,54,13);
+                    } else if (tt==1) {
+                      u8g2.drawBox(40,25,65,13);
+                    }
+                  }
+                  
+                } while ( u8g2.nextPage());
+
+              } while (ttm==1);
+            } 
+            // End Tail Tone
           }
         }
         lastSelectState=selectState;
-      // Power Saving (Physical pin)
-      // RF Power Selection (Physical Pin)
-      // Handshake - startup?
-      // Freuqncy Scanning??
-      // Group Setting?
-      // Volume
-      // LP/HP Filter
-      // Tail Tone? (Bad Ham)
-      // RSSI?
       } while (u8g2.nextPage());
     // End Menu2 Do/While Loop  
     } while (enterMenu==2);
